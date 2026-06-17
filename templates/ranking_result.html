@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <span class="text-muted">Analysis Console</span>
+        <h2 class="fw-bold text-dark">{{ job.title if job else 'Job Profile' }} <span class="text-secondary small">at {{ job.company if job else '' }}</span></h2>
+    </div>
+    <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-outline-secondary">&larr; Dashboard</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4 bg-white p-4">
+    <h5 class="fw-bold"><i class="bi bi-gear-fill text-secondary"></i> Run AI Ranking</h5>
+    <hr>
+    <p class="text-muted mb-2">Select candidates to rank against this job description:</p>
+    
+    {% if candidates or rankings %}
+        <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+            <div>
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>{{ (rankings|length) if rankings else (candidates|length) }} Candidate(s) Found</strong> inside ShaktiDB and automatically processed by the TF-IDF engine.
+            </div>
+        </div>
+    {% else %}
+        <p class="text-danger mb-0">No candidates in database. <a href="#">Upload resumes</a>.</p>
+    {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0 fw-bold text-success align-self-center">AI Real-Time Ranking Index Output</h5>
+        <span class="badge bg-light text-dark p-2 border">Algorithm: TF-IDF + Cosine Similarity Matrix</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Rank Position</th>
+                    <th>Candidate Profile Name</th>
+                    <th>Contact Metric</th>
+                    <th>Cosine Score Distance</th>
+                    <th>Matching Ratio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rankings %}
+                <tr>
+                    <td>
+                        <span class="badge {% if row.rank_position == 1 %}bg-danger{% elif row.rank_position == 2 %}bg-warning text-dark{% else %}bg-secondary{% endif %} rounded-circle p-2">
+                            #{{ row.rank_position }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fw-bold">{{ row.name }}</div>
+                        <span class="text-muted xsmall" style="font-size: 0.85rem;">File: {{ row.resume_file }}</span>
+                    </td>
+                    <td>
+                        <div>{{ row.email }}</div>
+                        <div class="text-muted small">{{ row.phone }}</div>
+                    </td>
+                    <td><code>{{ "%.4f"|format(row.similarity_score|float) }}</code></td>
+                    <td>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success fw-bold" role="progressbar" style="width: {{ row.percentage_match }}%;">
+                                {{ row.percentage_match }}%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        No ranking results yet. Select candidates above and click <strong>Run AI Ranking</strong>.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Post Job{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card shadow border-0">
+        <div class="card-body p-4">
+          <h4 class="mb-4"><i class="bi bi-briefcase-fill"></i> Post a New Job</h4>
+          <form method="POST" action="{{ url_for('recruiter.add_job') }}">
+            <div class="mb-3"><label class="form-label fw-semibold">Job Title *</label>
+              <input type="text" name="title" class="form-control" placeholder="e.g. Python Developer" required></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Company *</label>
+              <input type="text" name="company" class="form-control" placeholder="e.g. TechCorp" required></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Job Description *</label>
+              <textarea name="description" class="form-control" rows="6"
+                placeholder="Describe responsibilities, requirements, and qualifications..." required></textarea></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Required Skills <small class="text-muted">(comma-separated)</small></label>
+              <input type="text" name="required_skills" class="form-control" placeholder="Python, Machine Learning, SQL, Flask"></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Experience Required</label>
+              <input type="text" name="experience_required" class="form-control" placeholder="e.g. 2-4 years"></div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Job</button>
+              <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
