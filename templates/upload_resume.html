@@ -1,67 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mx-auto my-5" style="max-width: 650px;">
-    
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('recruiter.dashboard') }}" class="text-decoration-none text-secondary">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="text-decoration-none text-secondary">Screening Matrix</a></li>
-            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Add Candidate</li>
-        </ol>
-    </nav>
-
+<div class="container mx-auto my-5" style="max-width: 600px;">
     <div class="card border-0 shadow-lg bg-white rounded-4 overflow-hidden">
-        <div class="card-header text-white p-4" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
-            <div class="d-flex align-items-center gap-3">
-                <span class="fs-2">👤</span>
-                <div>
-                    <h5 class="mb-0 fw-bold text-white">Register Candidate Profile</h5>
-                    <small class="text-white-50">Input details manually to avoid parsing alignment bugs</small>
-                </div>
-            </div>
+        <div class="card-header bg-dark text-white py-3">
+            <h5 class="mb-0 fw-bold">➕ Register Candidate to Pipeline</h5>
         </div>
-        
         <div class="card-body p-4">
-            <div class="mb-4 p-3 rounded-3 border-start border-primary border-4" style="background-color: #f8fafc;">
-                <p class="mb-1 text-muted text-uppercase small tracking-wider fw-bold">Targeting Vacancy:</p>
+            <div class="mb-4 bg-light p-3 rounded border">
+                <p class="mb-0 text-muted small">Targeting Job Profile:</p>
                 <h5 class="fw-bold text-primary mb-0">{{ job.title }}</h5>
             </div>
             
             <form action="{{ url_for('candidate.add_candidate', job_id=job.job_id) }}" method="POST" enctype="multipart/form-data">
                 
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-secondary">Full Name <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control form-control-lg bg-light-subtle border-2" placeholder="e.g. Jane Doe" required>
-                </div>
-
-                <div class="row g-3 mb-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold text-secondary">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Jane Doe" required>
+                    </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-secondary">Email Address <span class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control bg-light-subtle border-2" placeholder="jane.doe@example.com" required>
+                        <label class="form-label fw-bold text-secondary">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="jane@example.com">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-secondary">Phone Number</label>
-                        <input type="text" name="phone" class="form-control bg-light-subtle border-2" placeholder="555-0100">
+                        <input type="text" name="phone" class="form-control" placeholder="555-0199">
                     </div>
                 </div>
 
-                <div class="p-3 mb-4 rounded-3 border-2 border-dashed text-center bg-light position-relative" style="border-color: #cbd5e1;">
-                    <label class="form-label fw-bold text-secondary d-block mb-2">Upload Resume Document <span class="text-danger">*</span></label>
-                    <input type="file" name="resume" class="form-control border-2 shadow-sm" accept=".pdf,.docx,.txt" required>
-                    <div class="form-text mt-2 text-muted small">Accepted file formats: <strong>PDF, DOCX, or TXT</strong></div>
+                <hr class="my-4">
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">Upload Resume Document <span class="text-danger">*</span></label>
+                    <input type="file" name="resume" class="form-control border-2" accept=".pdf,.docx,.txt" required>
+                    <small class="text-muted mt-1 d-block">Supported formats: PDF, DOCX, TXT</small>
                 </div>
                 
-                <div class="row g-2 pt-2 border-top">
-                    <div class="col-md-8">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold w-100 d-flex align-items-center justify-content-center gap-2" style="background-color: #2563eb; border: none;">
-                            <span>⚡ Save & Process Evaluation</span>
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="btn btn-light btn-lg text-secondary fw-semibold w-100 border">
-                            Cancel
-                        </a>
-                    </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold">Save Candidate & Run AI Score ⚡</button>
+                    <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="btn btn-light text-muted">Cancel</a>
                 </div>
             </form>
         </div>

@@ -29,7 +29,7 @@
                     <th>Job Title</th>
                     <th>Company Name</th>
                     <th>Required Experience</th>
-                    <th style="width: 350px;">Action Link</th>
+                    <th style="width: 320px;">Action Link</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,12 +40,12 @@
                     <td>{{ job.company }}</td>
                     <td><span class="badge bg-secondary">{{ job.experience_required }}</span></td>
                     <td>
-                        <div class="d-flex align-items-center gap-2" style="white-space: nowrap !important; display: flex !important;">
+                        <div class="d-flex align-items-center gap-2" style="white-space: nowrap;">
                             <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="btn btn-sm btn-dark px-3">
                                 View Candidates & Rankings
                             </a>
                             <form action="{{ url_for('recruiter.delete_job', job_id=job.job_id) }}" method="POST" onsubmit="return confirm('Are you completely sure you want to permanently delete this job spec and all uploaded resumes?');" class="m-0 d-inline">
-                                <button type="submit" class="btn btn-sm btn-danger px-3">
+                                <button type="submit" class="btn btn-sm btn-danger px-2">
                                     Delete
                                 </button>
                             </form>

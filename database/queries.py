@@ -40,6 +40,21 @@ def get_job_by_id(job_id):
         }
     return None
 
+def get_all_jobs():
+    query = "SELECT job_id, title, company, experience_required, description FROM jobs ORDER BY job_id DESC;"
+    results = execute_query(query, fetch=True)
+    jobs = []
+    if results:
+        for row in results:
+            jobs.append({
+                "job_id": row[0],
+                "title": row[1],
+                "company": row[2],
+                "experience_required": row[3],
+                "description": row[4]
+            })
+    return jobs
+
 
 # ════════════════════════════════════════════════════════════════
 # CANDIDATE QUERIES
@@ -50,10 +65,10 @@ def insert_candidate(name, email, phone, resume_file, resume_text):
         INSERT INTO candidates (name, email, phone, resume_file, resume_text) 
         VALUES (%s, %s, %s, %s, %s);
     """
-    execute_query(query, (name, email, phone, resume_file, resume_text))
+    return execute_query(query, (name, email, phone, resume_file, resume_text))
 
 def get_all_candidates():
-    query = "SELECT candidate_id, name, email, phone, resume_file FROM candidates;"
+    query = "SELECT candidate_id, name, email, phone, resume_file FROM candidates ORDER BY candidate_id DESC;"
     results = execute_query(query, fetch=True)
     candidates = []
     if results:
@@ -66,3 +81,25 @@ def get_all_candidates():
                 "resume_file": row[4]
             })
     return candidates
+
+def get_rankings_for_job(job_id):
+    query = """
+        SELECT r.candidate_id, c.name, c.email, r.similarity_score, r.percentage_match, r.rank_position
+        FROM rankings r
+        JOIN candidates c ON r.candidate_id = c.candidate_id
+        WHERE r.job_id = %s 
+        ORDER BY r.rank_position ASC;
+    """
+    results = execute_query(query, (job_id,), fetch=True)
+    rankings = []
+    if results:
+        for row in results:
+            rankings.append({
+                "candidate_id": row[0],
+                "name": row[1],
+                "email": row[2],
+                "score": row[3],
+                "match_ratio": row[4],
+                "rank_position": row[5]
+            })
+    return rankings

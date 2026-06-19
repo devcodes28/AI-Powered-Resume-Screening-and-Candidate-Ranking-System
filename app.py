@@ -1,42 +1,26 @@
 import os
-import sys
-
-# Force Python to explicitly anchor itself to your project directory root
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-
-from flask import Flask, render_template
+from flask import Flask, redirect, url_for
 from config import Config
 from database.db import init_db
-
-# 1. Initialize the core Flask application instance
-app = Flask(__name__)
-
-# 2. Load settings from your configuration class
-app.config.from_object(Config)
-
-# 3. Import and register blueprint routing modules
 from routes.recruiter_routes import recruiter_bp
 from routes.candidate_routes import candidate_bp
 
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# Ensure absolute structural upload matrices match fallback layouts
+app.config["UPLOAD_FOLDER"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
+app.config["ALLOWED_EXTENSIONS"] = {'pdf', 'docx', 'txt'}
+
+# Register Structural Blueprints to Core Matrix
 app.register_blueprint(recruiter_bp)
 app.register_blueprint(candidate_bp)
 
-# Base route to render index/home page if needed
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('recruiter.dashboard'))
 
-# 4. Global application execution block
-if __name__ == '__main__':
-    try:
-        # Run database initialization pipeline
-        init_db()
-        
-        print("[DEBUG] Starting local development server on port 5000...", flush=True)
-        
-        # Use config settings for flexibility
-        app.run(host='0.0.0.0', port=5000, debug=Config.DEBUG)
-    except Exception as run_err:
-        print(f"\nFATAL SERVER LIFECYCLE RUNTIME ERROR: {run_err}", file=sys.stderr)
+if __name__ == "__main__":
+    # Initializes database tables safely using IF NOT EXISTS 
+    init_db()
+    app.run(debug=True, host="0.0.0.0", port=5000)

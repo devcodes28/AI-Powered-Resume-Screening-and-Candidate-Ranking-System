@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.utils import secure_filename
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from services.resume_parser import extract_resume_text
+from services.resume_parser import parse_resume
 from services.ranking_service import trigger_ai_ranking_pipeline 
 
 candidate_bp = Blueprint("candidate", __name__)
@@ -106,7 +106,7 @@ def add_candidate(job_id):
 
             try:
                 file.save(save_path)
-                raw_text = extract_resume_text(save_path)
+                raw_text = parse_resume(save_path)
                 
                 name = _clean_string(name)
                 email = _clean_string(email)

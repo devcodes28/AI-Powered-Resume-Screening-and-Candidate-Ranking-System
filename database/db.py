@@ -1,5 +1,8 @@
 import psycopg2
 import sys
+import os
+# Import Extras to handle key-value dictionary records natively
+from psycopg2.extras import RealDictCursor
 
 def get_db_connection():
     try:
@@ -22,14 +25,16 @@ def execute_query(query, params=(), fetch=False):
         return None
     result = None
     try:
-        with conn.cursor() as cursor:
+        # FIXED: Enforce RealDictCursor so rows can be accessed via string keys
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(query, params)
             if fetch:
                 result = cursor.fetchall()
             conn.commit()
     except Exception as e:
         print(f"Database Query Error: {e}", file=sys.stderr)
-        conn.rollback()
+        if conn:
+            conn.rollback()
     finally:
         if conn:
             conn.close()
@@ -43,8 +48,15 @@ def init_db():
         return
     try:
         print("[DEBUG] Connection verified. Reading schema.sql...", flush=True)
-        with open('database/schema.sql', 'r') as f:
+        schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
+        
+        # Fallback to current working directory string if path isn't relative
+        if not os.path.exists(schema_path):
+            schema_path = 'database/schema.sql'
+            
+        with open(schema_path, 'r') as f:
             schema_sql = f.read()
+            
         with conn.cursor() as cursor:
             print("[DEBUG] Executing SQL Schema strings...", flush=True)
             cursor.execute(schema_sql)
