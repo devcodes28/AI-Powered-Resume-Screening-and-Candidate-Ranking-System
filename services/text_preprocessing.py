@@ -94,3 +94,7 @@ def extract_skills_keywords(text: str, skill_list: list[str] = None) -> list[str
     from collections import Counter
     freq = Counter(tokens)
     return [word for word, _ in freq.most_common(30)]
+
+
+# Fallback ML Alias alignment hook
+clean_text = preprocess_text

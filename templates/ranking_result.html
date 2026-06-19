@@ -1,80 +1,90 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="mb-4 d-flex justify-content-between align-items-center">
-    <div>
-        <span class="text-muted">Analysis Console</span>
-        <h2 class="fw-bold text-dark">{{ job.title if job else 'Job Profile' }} <span class="text-secondary small">at {{ job.company if job else '' }}</span></h2>
-    </div>
-    <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-outline-secondary">&larr; Dashboard</a>
-</div>
-
-<div class="card border-0 shadow-sm mb-4 bg-white p-4">
-    <h5 class="fw-bold"><i class="bi bi-gear-fill text-secondary"></i> Run AI Ranking</h5>
-    <hr>
-    <p class="text-muted mb-2">Select candidates to rank against this job description:</p>
+<div class="container my-5">
     
-    {% if candidates or rankings %}
-        <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
-            <div>
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>{{ (rankings|length) if rankings else (candidates|length) }} Candidate(s) Found</strong> inside ShaktiDB and automatically processed by the TF-IDF engine.
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('recruiter.dashboard') }}" class="text-decoration-none fw-medium text-secondary">Dashboard</a></li>
+                    <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Screening Matrix</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-0">
+                {{ job.title }} 
+                {% if job.company %}<span class="text-muted fs-5 fw-normal">at {{ job.company }}</span>{% endif %}
+            </h2>
         </div>
-    {% else %}
-        <p class="text-danger mb-0">No candidates in database. <a href="#">Upload resumes</a>.</p>
-    {% endif %}
-</div>
-
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-        <h5 class="mb-0 fw-bold text-success align-self-center">AI Real-Time Ranking Index Output</h5>
-        <span class="badge bg-light text-dark p-2 border">Algorithm: TF-IDF + Cosine Similarity Matrix</span>
+        <div>
+            <a href="{{ url_for('candidate.add_candidate', job_id=job.job_id) }}" class="btn btn-primary btn-lg fw-bold px-4 shadow-sm rounded-3">
+                ➕ Add New Candidate
+            </a>
+        </div>
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Rank Position</th>
-                    <th>Candidate Profile Name</th>
-                    <th>Contact Metric</th>
-                    <th>Cosine Score Distance</th>
-                    <th>Matching Ratio</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in rankings %}
-                <tr>
-                    <td>
-                        <span class="badge {% if row.rank_position == 1 %}bg-danger{% elif row.rank_position == 2 %}bg-warning text-dark{% else %}bg-secondary{% endif %} rounded-circle p-2">
-                            #{{ row.rank_position }}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="fw-bold">{{ row.name }}</div>
-                        <span class="text-muted xsmall" style="font-size: 0.85rem;">File: {{ row.resume_file }}</span>
-                    </td>
-                    <td>
-                        <div>{{ row.email }}</div>
-                        <div class="text-muted small">{{ row.phone }}</div>
-                    </td>
-                    <td><code>{{ "%.4f"|format(row.similarity_score|float) }}</code></td>
-                    <td>
-                        <div class="progress" style="height: 20px;">
-                            <div class="progress-bar bg-success fw-bold" role="progressbar" style="width: {{ row.percentage_match }}%;">
-                                {{ row.percentage_match }}%
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">
-                        No ranking results yet. Select candidates above and click <strong>Run AI Ranking</strong>.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark d-flex align-items-center">
+                <span class="me-2">🏆</span> AI Talent Alignment Standings
+            </h5>
+            <span class="badge bg-dark-subtle text-dark border px-3 py-2 rounded-pill fw-semibold">
+                Total Evaluated: {{ rankings|length }}
+            </span>
+        </div>
+        
+        <div class="card-body p-0">
+            {% if not rankings %}
+                <div class="text-center py-5 px-4 bg-light-subtle">
+                    <div class="fs-1 text-muted mb-3">📁</div>
+                    <h4 class="text-dark fw-bold mb-2">No Candidates Formally Tracked Yet</h4>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 520px;">
+                        Click the <strong>Add New Candidate</strong> button above to register profiles and initialize the NLP matching metrics.
+                    </p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-secondary small text-uppercase tracking-wider">
+                            <tr>
+                                <th class="ps-4 py-3" style="width: 12%;">Rank</th>
+                                <th style="width: 33%;">Candidate Identity</th>
+                                <th style="width: 33%;">Contact Point</th>
+                                <th class="text-end pe-4" style="width: 22%;">NLP Matching Strength</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate in rankings %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge {% if loop.index == 1 %}bg-warning text-dark border border-warning-subtle fs-6{% else %}bg-dark text-white{% endif %} rounded-pill px-3 py-2 fw-bold shadow-sm">
+                                        #{{ loop.index }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark fs-5 d-block">{{ candidate.name }}</span>
+                                    {% if candidate.phone %}
+                                        <small class="text-muted d-block mt-0.5"><i class="bi bi-telephone"></i> {{ candidate.phone }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-secondary fw-medium">{{ candidate.email }}</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex align-items-center justify-content-end w-100">
+                                        {% set pct_val = candidate.score|float %}
+                                        <div class="progress me-3 d-none d-sm-flex shadow-sm-inner" style="width: 110px; height: 10px; border-radius: 6px; background-color: #e9ecef;">
+                                            <div class="progress-bar bg-success rounded-pill" style="--width-fallback: {{ pct_val }}; width: calc(var(--width-fallback) * 1%);"></div>
+                                        </div>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold px-3 py-2 fs-6 rounded-3">
+                                            {{ "%.2f"|format(pct_val) }}% Score
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

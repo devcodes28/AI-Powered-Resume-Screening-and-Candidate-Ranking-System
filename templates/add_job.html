@@ -1,32 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Post Job{% endblock %}
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-7">
-      <div class="card shadow border-0">
-        <div class="card-body p-4">
-          <h4 class="mb-4"><i class="bi bi-briefcase-fill"></i> Post a New Job</h4>
-          <form method="POST" action="{{ url_for('recruiter.add_job') }}">
-            <div class="mb-3"><label class="form-label fw-semibold">Job Title *</label>
-              <input type="text" name="title" class="form-control" placeholder="e.g. Python Developer" required></div>
-            <div class="mb-3"><label class="form-label fw-semibold">Company *</label>
-              <input type="text" name="company" class="form-control" placeholder="e.g. TechCorp" required></div>
-            <div class="mb-3"><label class="form-label fw-semibold">Job Description *</label>
-              <textarea name="description" class="form-control" rows="6"
-                placeholder="Describe responsibilities, requirements, and qualifications..." required></textarea></div>
-            <div class="mb-3"><label class="form-label fw-semibold">Required Skills <small class="text-muted">(comma-separated)</small></label>
-              <input type="text" name="required_skills" class="form-control" placeholder="Python, Machine Learning, SQL, Flask"></div>
-            <div class="mb-3"><label class="form-label fw-semibold">Experience Required</label>
-              <input type="text" name="experience_required" class="form-control" placeholder="e.g. 2-4 years"></div>
-            <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Job</button>
-              <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-            </div>
-          </form>
+<div class="card border-0 shadow-sm max-width-form mx-auto p-4">
+    <h3 class="fw-bold mb-3 text-dark">Publish New Job Specification</h3>
+    <form action="{{ url_for('recruiter.add_job') }}" method="POST">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Job Title</label>
+            <input type="text" name="title" class="form-control" placeholder="e.g., Senior Full-Stack Developer" required>
         </div>
-      </div>
-    </div>
-  </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Company Name</label>
+            <input type="text" name="company" class="form-control" placeholder="e.g., Shakti Enterprise AI" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Required Experience Target Matrix</label>
+            <input type="text" name="experience_required" class="form-control" placeholder="e.g., 3-5 Years" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Key Core Skills (Comma Separated)</label>
+            <input type="text" name="required_skills" class="form-control" placeholder="Python, Flask, PostgreSQL, PyTorch" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Comprehensive Job Description Context</label>
+            <textarea name="description" class="form-control" rows="6" placeholder="Provide complete technical expectations..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary px-4">Commit to Database</button>
+    </form>
 </div>
 {% endblock %}

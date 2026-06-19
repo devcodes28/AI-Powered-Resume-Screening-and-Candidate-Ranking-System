@@ -1,114 +1,27 @@
-"""
-services/resume_parser.py
---------------------------
-Extracts raw text from uploaded resume files (PDF or DOCX).
-
-Supported formats
------------------
-.pdf  → pdfplumber
-.docx → python-docx
-"""
-
-import os
 import re
-import pdfplumber
-from docx import Document
 
-
-def extract_text_from_pdf(filepath: str) -> str:
+def extract_resume_text(file_path):
     """
-    Extract all text from a PDF file using pdfplumber.
-
-    Parameters
-    ----------
-    filepath : absolute path to the .pdf file
-
-    Returns
-    -------
-    str : concatenated text from all pages
-    """
-    text_parts = []
-    try:
-        with pdfplumber.open(filepath) as pdf:
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text_parts.append(page_text)
-    except Exception as e:
-        raise ValueError(f"Failed to read PDF '{filepath}': {e}")
-
-    return "\n".join(text_parts)
-
-
-def extract_text_from_docx(filepath: str) -> str:
-    """
-    Extract all paragraph text from a DOCX file.
-
-    Parameters
-    ----------
-    filepath : absolute path to the .docx file
-
-    Returns
-    -------
-    str : concatenated paragraph text
+    Extracts raw text content from an uploaded resume file path.
     """
     try:
-        doc = Document(filepath)
-        paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
-        return "\n".join(paragraphs)
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            return f.read()
     except Exception as e:
-        raise ValueError(f"Failed to read DOCX '{filepath}': {e}")
+        print(f"Error reading file path {file_path}: {str(e)}")
+        return ""
 
-
-def extract_resume_text(filepath: str) -> str:
+def parse_resume_fields(text):
     """
-    Route to the correct extractor based on file extension.
-
-    Parameters
-    ----------
-    filepath : absolute path to the uploaded resume
-
-    Returns
-    -------
-    str : raw extracted text
+    Extracts structured fields like email and phone numbers from raw resume text matrices.
     """
-    ext = os.path.splitext(filepath)[-1].lower()
-
-    if ext == ".pdf":
-        return extract_text_from_pdf(filepath)
-    elif ext in (".docx", ".doc"):
-        return extract_text_from_docx(filepath)
-    else:
-        raise ValueError(f"Unsupported file format: '{ext}'")
-
-
-# ── Lightweight field heuristics ──────────────────────────────────────────────
-# These are best-effort patterns — a full NER pipeline is overkill for a
-# final-year project, but these cover common resume layouts.
-
-def extract_email(text: str) -> str:
-    match = re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text)
-    return match.group(0) if match else ""
-
-
-def extract_phone(text: str) -> str:
-    # Handles formats like +91-9876543210, (123) 456-7890, 9876543210
-    match = re.search(
-        r"(\+?\d[\d\s\-().]{8,15}\d)", text
-    )
-    return match.group(0).strip() if match else ""
-
-
-def parse_resume_fields(raw_text: str) -> dict:
-    """
-    Extract structured fields from raw resume text.
-
-    Returns
-    -------
-    dict with keys: email, phone
-    (name extraction is left to the upload form for accuracy)
-    """
+    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    phone_pattern = r'\b\d{10}\b|\+?\d{1,3}[-.\s]?\d{3}[-.\s]?\d{3}[-.\s]?\d{4}'
+    
+    email = re.search(email_pattern, text)
+    phone = re.search(phone_pattern, text)
+    
     return {
-        "email": extract_email(raw_text),
-        "phone": extract_phone(raw_text),
+        "email": email.group(0) if email else "Not Found",
+        "phone": phone.group(0) if phone else "Not Found"
     }

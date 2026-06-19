@@ -1,155 +1,147 @@
-"""
-routes/candidate_routes.py
---------------------------
-Handles: resume upload, ranking trigger, ranking results display.
-"""
-
 import os
-from flask import (
-    Blueprint, render_template, request, redirect,
-    url_for, session, flash, current_app
-)
+import sys
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename
-from database import queries as q
-from services.resume_parser import extract_resume_text, parse_resume_fields
-from services.ranking_service import run_ranking_for_job
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from services.resume_parser import extract_resume_text
+from services.ranking_service import trigger_ai_ranking_pipeline 
 
 candidate_bp = Blueprint("candidate", __name__)
 
+def get_direct_conn():
+    return psycopg2.connect(
+        dbname="resume_ai",
+        user="postgres",
+        host="/tmp"
+    )
 
 def _allowed_file(filename: str) -> bool:
-    ext = os.path.splitext(filename)[-1].lower().lstrip(".")
-    return ext in current_app.config["ALLOWED_EXTENSIONS"]
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ['pdf', 'docx', 'txt']
 
+def _clean_string(value: str) -> str:
+    if not value: return ""
+    return str(value).replace("\x00", "").replace("\u0000", "").strip()
 
-def _login_required_redirect():
-    from functools import wraps
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            if "recruiter_id" not in session:
-                flash("Please log in.", "warning")
-                return redirect(url_for("recruiter.login"))
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
-login_required = _login_required_redirect()
-
-
-# ════════════════════════════════════════════════════════════════
-# UPLOAD RESUME
-# ════════════════════════════════════════════════════════════════
-
-@candidate_bp.route("/upload-resume/<int:job_id>", methods=["GET", "POST"])
-@login_required
-def upload_resume(job_id):
-    job = q.get_job_by_id(job_id)
-    if not job:
-        flash("Job not found.", "danger")
-        return redirect(url_for("recruiter.dashboard"))
-
-    if request.method == "POST":
-        files      = request.files.getlist("resumes")
-        errors     = []
-        uploaded   = 0
-
-        for file in files:
-            if not file or not file.filename:
-                continue
-
-            if not _allowed_file(file.filename):
-                errors.append(f"'{file.filename}' — unsupported format (use PDF or DOCX).")
-                continue
-
-            # ── Save file securely ────────────────────────────────────────
-            filename   = secure_filename(file.filename)
-            save_path  = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-
-            # Avoid name collisions
-            base, ext = os.path.splitext(filename)
-            counter   = 1
-            while os.path.exists(save_path):
-                filename  = f"{base}_{counter}{ext}"
-                save_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-                counter  += 1
-
-            file.save(save_path)
-
-            # ── Extract text ──────────────────────────────────────────────
-            try:
-                raw_text = extract_resume_text(save_path)
-            except Exception as e:
-                errors.append(f"'{filename}' — could not extract text: {e}")
-                continue
-
-            # ── Auto-extract email/phone from text ────────────────────────
-            fields = parse_resume_fields(raw_text)
-            name   = request.form.get(f"name_{file.filename}", "").strip()
-            name   = name or os.path.splitext(file.filename)[0]  # fallback
-
-            # ── Persist to DB ─────────────────────────────────────────────
-            q.insert_candidate(
-                name        = name,
-                email       = fields.get("email", ""),
-                phone       = fields.get("phone", ""),
-                resume_file = filename,
-                resume_text = raw_text,
-            )
-            uploaded += 1
-
-        if errors:
-            for err in errors:
-                flash(err, "warning")
-        if uploaded > 0:
-            flash(f"{uploaded} resume(s) uploaded successfully.", "success")
-            return redirect(url_for("candidate.rank_candidates_view", job_id=job_id))
-
-        return redirect(url_for("candidate.upload_resume", job_id=job_id))
-
-    # GET — show form
-    return render_template("upload_resume.html", job=job)
-
-
-# ════════════════════════════════════════════════════════════════
-# RANK CANDIDATES
-# ════════════════════════════════════════════════════════════════
-
-@candidate_bp.route("/rank/<int:job_id>", methods=["GET", "POST"])
-@login_required
+# ---------------------------------------------------------
+# 1. THE RANKING HUB (Pulls Fresh Data Instantly)
+# ---------------------------------------------------------
+@candidate_bp.route("/rank/<int:job_id>", methods=["GET"])
 def rank_candidates_view(job_id):
-    """
-    GET  : Show existing ranking results for a job.
-    POST : Re-run the AI ranking for selected candidates.
-    """
-    job = q.get_job_by_id(job_id)
-    if not job:
-        flash("Job not found.", "danger")
+    try:
+        conn = get_direct_conn()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Pull targeted job detail
+        cursor.execute("SELECT job_id, title, company, description FROM jobs WHERE job_id = %s;", (job_id,))
+        job_rows = cursor.fetchall()
+        
+        if not job_rows:
+            cursor.close()
+            conn.close()
+            flash("Target position reference missing.", "danger")
+            return redirect(url_for("recruiter.dashboard"))
+        job = job_rows[0]
+
+        # Fetch candidate rankings sorted by score DESC
+        cursor.execute("SELECT candidate_id, name, email, phone, score FROM candidates WHERE job_id = %s ORDER BY score DESC, candidate_id DESC;", (job_id,))
+        ranked = cursor.fetchall() or []
+        
+        cursor.close()
+        conn.close()
+        
+        return render_template("ranking_result.html", job=job, rankings=ranked, ranked=ranked)
+    except Exception as e:
+        print(f"❌ LEADERBOARD VIEW FAILED: {str(e)}", file=sys.stderr)
+        flash(f"Failed to load leaderboard matrix: {str(e)}", "danger")
+        return redirect(url_for("recruiter.dashboard"))
+
+
+# ---------------------------------------------------------
+# 2. ADD EXPLICIT CANDIDATE (Runs Pipeline Synchronously)
+# ---------------------------------------------------------
+@candidate_bp.route("/add-candidate/<int:job_id>", methods=["GET", "POST"])
+def add_candidate(job_id):
+    try:
+        conn = get_direct_conn()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT job_id, title, company FROM jobs WHERE job_id = %s;", (job_id,))
+        job_rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        if not job_rows:
+            return redirect(url_for("recruiter.dashboard"))
+        job = job_rows[0]
+    except Exception as e:
+        print(f"❌ FAILED TO FETCH JOB CONTEXT: {str(e)}", file=sys.stderr)
         return redirect(url_for("recruiter.dashboard"))
 
     if request.method == "POST":
-        # Recruiter selected specific candidates to rank
-        selected_ids = request.form.getlist("candidate_ids")
-        if not selected_ids:
-            flash("Select at least one candidate to rank.", "warning")
-            return redirect(url_for("candidate.rank_candidates_view", job_id=job_id))
+        name = request.form.get("name", "Unknown Candidate")
+        email = request.form.get("email", "no-email@example.com")
+        phone = request.form.get("phone", "N/A")
+        
+        if 'resume' not in request.files:
+            flash("Please attach the candidate's resume.", "danger")
+            return redirect(request.url)
+            
+        file = request.files['resume']
+        if file.filename == '':
+            flash("No file selected.", "warning")
+            return redirect(request.url)
 
-        try:
-            results = run_ranking_for_job(job_id, [int(i) for i in selected_ids])
-            flash(f"AI ranking complete for {len(results)} candidate(s).", "success")
-        except Exception as e:
-            flash(f"Ranking failed: {e}", "danger")
+        if file and _allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            os.makedirs(current_app.config["UPLOAD_FOLDER"], exist_ok=True)
+            
+            save_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+            
+            base, ext = os.path.splitext(filename)
+            counter = 1
+            while os.path.exists(save_path):
+                filename = f"{base}_{counter}{ext}"
+                save_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+                counter += 1
 
-        return redirect(url_for("candidate.rank_candidates_view", job_id=job_id))
+            try:
+                file.save(save_path)
+                raw_text = extract_resume_text(save_path)
+                
+                name = _clean_string(name)
+                email = _clean_string(email)
+                phone = _clean_string(phone)
+                filename = _clean_string(filename)
+                raw_text = _clean_string(raw_text)
 
-    # GET — load saved rankings
-    ranked    = q.get_rankings_for_job(job_id)
-    all_cands = q.get_all_candidates()
+                # Open Write connection
+                conn = get_direct_conn()
+                cursor = conn.cursor()
+                
+                # Insert the candidate record
+                insert_query = """
+                    INSERT INTO candidates (name, email, phone, resume_file, resume_text, job_id, score) 
+                    VALUES (%s, %s, %s, %s, %s, %s, 0.00);
+                """
+                cursor.execute(insert_query, (name, email, phone, filename, raw_text, job_id))
+                
+                # Commit candidate immediately so the pipeline can find them in the database
+                conn.commit()
+                cursor.close()
+                conn.close()
+                
+                # Trigger calculations synchronously
+                pipeline_success = trigger_ai_ranking_pipeline(job_id)
+                
+                if pipeline_success:
+                    flash(f"Candidate '{name}' successfully added and AI Rankings updated!", "success")
+                else:
+                    flash(f"Candidate saved, but AI pipeline returned 0 or failed to compute scores.", "warning")
 
-    return render_template(
-        "ranking_result.html",
-        job=job,
-        ranked=ranked,
-        all_candidates=all_cands,
-    )
+                return redirect(url_for('candidate.rank_candidates_view', job_id=job_id))
+                
+            except Exception as e:
+                print(f"❌ CANDIDATE INSERT CRASHED: {str(e)}", file=sys.stderr)
+                flash(f"Database/System Error: {e}", "danger")
+                
+    return render_template("upload_resume.html", job=job)
