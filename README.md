@@ -4,8 +4,6 @@
 
 Shakti Resume Screener is a full-stack recruitment platform designed to eliminate manual resume screening. By leveraging Natural Language Processing (NLP) and a high-performance backend, this system automatically ranks candidates based on their alignment with job descriptions.
 
----
-
 ## 🛠 Features
 
 ### 🧠 AI-Powered Ranking Engine
@@ -22,8 +20,6 @@ Shakti Resume Screener is a full-stack recruitment platform designed to eliminat
 - **Global Job Board:** A centralized, responsive portal for candidates to browse all open positions.
 - **Branded Experience:** Clean, professional UI built with Tailwind CSS for maximum accessibility.
 
----
-
 ## 🏗 Tech Stack
 
 | Layer | Technology |
@@ -33,8 +29,6 @@ Shakti Resume Screener is a full-stack recruitment platform designed to eliminat
 | **NLP/ML** | Scikit-learn (TF-IDF), NLTK |
 | **Frontend** | Jinja2, Tailwind CSS, JavaScript |
 | **Deployment** | VirtualBox (Linux), Git LFS |
-
----
 
 ## 🚀 Getting Started
 
