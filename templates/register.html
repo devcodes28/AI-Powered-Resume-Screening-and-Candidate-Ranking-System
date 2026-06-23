@@ -1,25 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Register{% endblock %}
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="card shadow border-0">
-        <div class="card-body p-4">
-          <h4 class="card-title text-center mb-4"><i class="bi bi-person-plus"></i> Create Account</h4>
-          <form method="POST" action="{{ url_for('recruiter.register') }}">
-            <div class="mb-3"><label class="form-label">Full Name</label>
-              <input type="text" name="name" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Email</label>
-              <input type="email" name="email" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Password</label>
-              <input type="password" name="password" class="form-control" required></div>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
-          </form>
-          <hr><p class="text-center small">Have an account? <a href="{{ url_for('recruiter.login') }}">Login</a></p>
+<div class="flex-grow flex items-center justify-center py-12">
+    <div class="w-full max-w-sm bg-panel border border-border rounded-xl shadow-2xl p-8">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-semibold tracking-tight text-brand">Create an account</h2>
+            <p class="text-sm text-muted mt-2">Initialize your recruiter profile</p>
         </div>
-      </div>
+
+        <form method="POST" action="{{ url_for('recruiter.register') }}" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-brand mb-1.5">Full Name</label>
+                <input type="text" name="name" required class="w-full bg-base border border-border rounded-lg px-4 py-2 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="Jane Doe">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-brand mb-1.5">Email address</label>
+                <input type="email" name="email" required class="w-full bg-base border border-border rounded-lg px-4 py-2 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="jane@company.com">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-brand mb-1.5">Password</label>
+                <input type="password" name="password" required class="w-full bg-base border border-border rounded-lg px-4 py-2 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all" placeholder="Create a strong password">
+            </div>
+
+            <button type="submit" class="w-full bg-accent text-black font-medium py-2.5 rounded-lg text-sm hover:bg-zinc-200 transition-colors mt-4">
+                Initialize Account
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-muted mt-8">
+            Already have an account? <a href="{{ url_for('recruiter.login') }}" class="text-brand hover:underline underline-offset-4">Sign in</a>
+        </p>
     </div>
-  </div>
 </div>
 {% endblock %}

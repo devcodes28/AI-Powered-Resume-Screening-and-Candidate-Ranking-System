@@ -1,13 +1,12 @@
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-# Import the exact verified function name directly
 from services.text_preprocessing import preprocess_text
 
 def rank_candidates(job_desc, candidate_profiles):
     """
     Executes structural vector space comparisons using Sklearn TF-IDF matrices.
-    Learns vocabulary weights across the entire document corpus to ensure accurate calculations.
+    Includes normalizers for sparse-vector human language mapping.
     """
     if not candidate_profiles:
         return []
@@ -18,45 +17,48 @@ def rank_candidates(job_desc, candidate_profiles):
     # 2. Extract and clean all candidate resume strings
     cleaned_resumes = [preprocess_text(str(c['resume_text'])) for c in candidate_profiles]
     
-    # 3. Create a combined text pool for the TF-IDF matrix workspace
+    # 3. Create a combined text pool for the matrix workspace
     corpus = [cleaned_job] + cleaned_resumes
     
-    # 4. Fit the TF-IDF Vectorizer across the combined text pool
-    vectorizer = TfidfVectorizer(stop_words='english', sublinear_tf=True)
-    tfidf_matrix = vectorizer.fit_transform(corpus)
+    # FIX 1: Turn off IDF. In small batches, IDF punishes matching core skills 
+    # if multiple candidates share them (e.g., driving "React" to a 0 weight).
+    vectorizer = TfidfVectorizer(stop_words='english', use_idf=False, sublinear_tf=True)
     
-    # The job vector is the first item in our matrix rows
+    try:
+        tfidf_matrix = vectorizer.fit_transform(corpus)
+    except ValueError:
+        return [{'candidate_id': c['candidate_id'], 'score': 0.0, 'percentage': 0.0, 'rank_position': i+1} for i, c in enumerate(candidate_profiles)]
+    
     job_vector = tfidf_matrix[0]
-    
     ranked_results = []
     
-    # 5. Extract similarity values for each candidate resume row
+    # 4. Extract similarity values for each candidate resume row
     for index, candidate in enumerate(candidate_profiles):
-        # Resumes match to indices 1, 2, 3, etc. in our generated matrix
         resume_vector = tfidf_matrix[index + 1]
         
-        # Calculate the mathematical dot product matrix similarity
+        # Calculate the raw mathematical dot product
         similarity = cosine_similarity(job_vector, resume_vector)[0][0]
+        raw_score = float(similarity)
         
-        score = float(similarity)
-        
-        # If the math outputs a literal 0 due to an empty file read, 
-        # let's generate a unique synthetic fallback match based on their ID 
-        # using pure Python math so no external library is required.
-        if score == 0.0:
-            # Stably map the candidate ID into a unique percentage between 68% and 94%
-            candidate_num = int(candidate['candidate_id'])
-            percentage = round(68.0 + ((candidate_num * 17) % 260) / 10.0, 2)
+        # FIX 2: Apply a Square-Root Normalization Curve.
+        # This maps highly sparse text-vector math (0.01 - 0.20) into intuitive 
+        # HR grading percentages (e.g., a raw 0.07 maps to a realistic 66%).
+        if raw_score > 0.0:
+            adjusted_score = (raw_score ** 0.5) * 2.5
         else:
-            percentage = round(score * 100, 2)
+            adjusted_score = 0.0
+            
+        # Cap at 98% to maintain scoring realism
+        final_score = min(0.98, adjusted_score)
+        percentage = round(final_score * 100, 2)
         
         ranked_results.append({
             'candidate_id': candidate['candidate_id'],
-            'score': score,
+            'score': final_score,
             'percentage': percentage
         })
         
-    # Sort candidates dynamically by their match percentage
+    # Sort candidates dynamically by their mapped match percentage
     ranked_results.sort(key=lambda x: x['percentage'], reverse=True)
     
     # Assign leaderboard positions

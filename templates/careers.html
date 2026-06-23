@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Opportunities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #09090b; color: #fafafa; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+    
+    <!-- Static Header -->
+    <header class="py-16 text-center border-b border-zinc-800 bg-zinc-950">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white">Join Our Network</h1>
+        <p class="text-zinc-400 text-lg max-w-2xl mx-auto px-4">Browse all open positions across our partner companies.</p>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-12">
+        {% if not jobs %}
+            <div class="text-center py-12 text-zinc-500">No open positions currently available. Check back soon.</div>
+        {% else %}
+            <div class="space-y-6">
+                {% for job in jobs %}
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8 hover:border-zinc-600 transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-2">{{ job.title }}</h2>
+                            <div class="flex items-center gap-4 text-sm text-zinc-400 mb-4">
+                                <!-- Dynamically show the recruiter's name -->
+                                <span class="flex items-center text-cyan-400 font-medium">🏢 {{ job.recruiter_name or job.company }}</span>
+                                <span class="flex items-center">⏱ {{ job.experience_required }}</span>
+                            </div>
+                            <p class="text-zinc-500 text-sm line-clamp-2 max-w-2xl">{{ job.description }}</p>
+                        </div>
+                        
+                        <!-- Apply Button -->
+                        <a href="{{ url_for('candidate.apply_job_public', job_id=job.job_id) }}" 
+                           class="whitespace-nowrap px-8 py-3 rounded-lg text-black font-bold text-center transition-all hover:opacity-90 hover:scale-105 bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                            Apply Now
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </main>
+
+    <footer class="py-8 text-center text-zinc-600 text-sm border-t border-zinc-900">
+        &copy; 2026 Shakti Resume Screener. All rights reserved.
+    </footer>
+</body>
+</html>

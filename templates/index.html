@@ -1,9 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="p-5 my-4 bg-white rounded-3 border shadow-sm text-center">
-    <h1 class="display-5 fw-bold text-dark">Welcome to Shakti AI Screener</h1>
-    <p class="lead text-muted">Navigate using the control bar to manage your recruitment pipeline.</p>
-    <hr class="my-4">
-    <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+<div class="relative w-full h-[85vh] flex flex-col items-center justify-center rounded-2xl overflow-hidden border border-border shadow-2xl mt-4">
+    
+    <div class="absolute inset-0 z-0 bg-zinc-950">
+        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop" alt="Abstract Tech" class="w-full h-full object-cover opacity-20">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-base"></div>
+    </div>
+
+    <div class="relative z-10 text-center px-4 max-w-3xl mx-auto">
+        <div class="mb-6 flex justify-center">
+            <svg class="w-16 h-16 text-white opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tighter mb-6 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+            Shakti Resume Screener
+        </h1>
+        
+        <p class="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto font-light">
+            AI-powered talent alignment. Fast, secure, and built for the future of recruitment.
+        </p>
+
+        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-center gap-6 mt-10">
+            <span class="text-zinc-400 font-medium">Choose your path:</span>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <a href="{{ url_for('candidate.public_careers') }}" 
+                class="bg-cyan-500 hover:bg-cyan-400 text-black px-6 py-2.5 rounded-lg font-bold transition-all shadow-lg">
+                    View All Job Openings
+                </a>
+                
+                <a href="{{ url_for('recruiter.login') }}" 
+                class="bg-white hover:bg-zinc-200 text-black px-6 py-2.5 rounded-lg font-bold transition-all shadow-lg">
+                    Recruiter Console Access
+                </a>
+            </div>
+        </div>
 </div>
 {% endblock %}

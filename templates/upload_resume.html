@@ -1,44 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mx-auto my-5" style="max-width: 600px;">
-    <div class="card border-0 shadow-lg bg-white rounded-4 overflow-hidden">
-        <div class="card-header bg-dark text-white py-3">
-            <h5 class="mb-0 fw-bold">➕ Register Candidate to Pipeline</h5>
+<div class="py-8 max-w-xl mx-auto w-full">
+    
+    <div class="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-border bg-base/50">
+            <h5 class="font-semibold text-brand">Register Candidate to Pipeline</h5>
         </div>
-        <div class="card-body p-4">
-            <div class="mb-4 bg-light p-3 rounded border">
-                <p class="mb-0 text-muted small">Targeting Job Profile:</p>
-                <h5 class="fw-bold text-primary mb-0">{{ job.title }}</h5>
+        
+        <div class="p-6">
+            <div class="mb-6 bg-zinc-900/50 border border-border p-4 rounded-lg">
+                <p class="text-xs text-muted uppercase tracking-wider mb-1">Targeting Profile</p>
+                <h5 class="font-bold text-brand">{{ job.title }}</h5>
             </div>
             
-            <form action="{{ url_for('candidate.add_candidate', job_id=job.job_id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ url_for('candidate.add_candidate', job_id=job.job_id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold text-secondary">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Jane Doe" required>
+                <div>
+                    <label class="block text-sm font-medium text-brand mb-1.5">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" required class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="e.g. Jane Doe">
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-brand mb-1.5">Email Address</label>
+                        <input type="email" name="email" class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="jane@example.com">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-secondary">Email Address</label>
-                        <input type="email" name="email" class="form-control" placeholder="jane@example.com">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-secondary">Phone Number</label>
-                        <input type="text" name="phone" class="form-control" placeholder="555-0199">
+                    <div>
+                        <label class="block text-sm font-medium text-brand mb-1.5">Phone Number</label>
+                        <input type="text" name="phone" class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="555-0199">
                     </div>
                 </div>
 
-                <hr class="my-4">
+                <hr class="border-border my-6">
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-secondary">Upload Resume Document <span class="text-danger">*</span></label>
-                    <input type="file" name="resume" class="form-control border-2" accept=".pdf,.docx,.txt" required>
-                    <small class="text-muted mt-1 d-block">Supported formats: PDF, DOCX, TXT</small>
+                <div>
+                    <label class="block text-sm font-medium text-brand mb-1.5">Upload Resume Document <span class="text-red-500">*</span></label>
+                    
+                    <input type="file" name="resume" required accept=".pdf,.docx,.txt" 
+                        class="block w-full text-sm text-muted
+                        file:mr-4 file:py-2.5 file:px-4
+                        file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-zinc-800 file:text-brand
+                        hover:file:bg-zinc-700
+                        border border-dashed border-zinc-700 rounded-lg p-2 bg-base/50
+                        transition-all cursor-pointer">
+                    <p class="text-xs text-muted mt-2">Supported formats: PDF, DOCX, TXT</p>
                 </div>
                 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg fw-bold">Save Candidate & Run AI Score ⚡</button>
-                    <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="btn btn-light text-muted">Cancel</a>
+                <div class="pt-4 flex flex-col sm:flex-row gap-3">
+                    <button type="submit" class="flex-1 bg-brand text-black font-medium py-2.5 rounded-lg text-sm hover:bg-zinc-200 transition-colors">
+                        Save & Run AI Score ⚡
+                    </button>
+                    <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="sm:w-32 bg-zinc-800 text-brand font-medium py-2.5 rounded-lg text-sm hover:bg-zinc-700 transition-colors border border-zinc-700 text-center">
+                        Cancel
+                    </a>
                 </div>
             </form>
         </div>

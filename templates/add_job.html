@@ -1,29 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card border-0 shadow-sm max-width-form mx-auto p-4">
-    <h3 class="fw-bold mb-3 text-dark">Publish New Job Specification</h3>
-    <form action="{{ url_for('recruiter.add_job') }}" method="POST">
-        <div class="mb-3">
-            <label class="form-label fw-bold">Job Title</label>
-            <input type="text" name="title" class="form-control" placeholder="e.g., Senior Full-Stack Developer" required>
+<div class="py-8 max-w-2xl mx-auto w-full">
+    
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold tracking-tight text-brand">Publish Job Specification</h2>
+        <p class="text-muted text-sm mt-1">Define the parameters for the AI screening engine.</p>
+    </div>
+
+    <form action="{{ url_for('recruiter.add_job') }}" method="POST" class="bg-panel border border-border rounded-xl shadow-sm p-6 sm:p-8 space-y-6">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-brand mb-1.5">Job Title</label>
+                <input type="text" name="title" required class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="Senior AI Engineer">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-brand mb-1.5">Company Name</label>
+                <input type="text" name="company" required class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="Shakti Labs">
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label fw-bold">Company Name</label>
-            <input type="text" name="company" class="form-control" placeholder="e.g., Shakti Enterprise AI" required>
+
+        <div>
+            <label class="block text-sm font-medium text-brand mb-1.5">Experience Target Matrix</label>
+            <input type="text" name="experience_required" required class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="e.g., 3-5 Years">
         </div>
-        <div class="mb-3">
-            <label class="form-label fw-bold">Required Experience Target Matrix</label>
-            <input type="text" name="experience_required" class="form-control" placeholder="e.g., 3-5 Years" required>
+
+        <div>
+            <label class="block text-sm font-medium text-brand mb-1.5">Core Skills <span class="text-muted font-normal">(Comma Separated)</span></label>
+            <input type="text" name="required_skills" required class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="Python, PyTorch, React, Vector DBs">
         </div>
-        <div class="mb-3">
-            <label class="form-label fw-bold">Key Core Skills (Comma Separated)</label>
-            <input type="text" name="required_skills" class="form-control" placeholder="Python, Flask, PostgreSQL, PyTorch" required>
+
+        <div>
+            <label class="block text-sm font-medium text-brand mb-1.5">Technical Assessment Link <span class="text-muted font-normal">(Optional)</span></label>
+            <input type="url" name="assessment_url" class="w-full bg-base border border-border rounded-lg px-4 py-2.5 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600" placeholder="https://hackerrank.com/test-link">
         </div>
-        <div class="mb-3">
-            <label class="form-label fw-bold">Comprehensive Job Description Context</label>
-            <textarea name="description" class="form-control" rows="6" placeholder="Provide complete technical expectations..." required></textarea>
+
+        <div>
+            <label class="block text-sm font-medium text-brand mb-1.5">Comprehensive Job Context</label>
+            <textarea name="description" rows="5" required class="w-full bg-base border border-border rounded-lg px-4 py-3 text-brand text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all placeholder-zinc-600 resize-y" placeholder="Paste the full job description here..."></textarea>
         </div>
-        <button type="submit" class="btn btn-primary px-4">Commit to Database</button>
+
+        <div class="pt-2">
+            <button type="submit" class="w-full bg-brand text-black font-medium py-3 rounded-lg text-sm hover:bg-zinc-200 transition-colors">
+                Initialize Job Matrix
+            </button>
+        </div>
     </form>
 </div>
 {% endblock %}

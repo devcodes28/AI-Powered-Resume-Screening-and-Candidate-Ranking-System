@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4">
+    <div class="text-center bg-panel border border-border p-10 rounded-2xl shadow-xl max-w-lg w-full">
+        <!-- Success Icon -->
+        <div class="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-brand mb-3">Application Received!</h1>
+        <p class="text-muted mb-8 leading-relaxed">
+            Thank you for your interest. Your resume has been uploaded successfully, and our AI engine is currently analyzing your profile against the job requirements.
+        </p>
+        
+        <a href="/" class="inline-block bg-brand text-black font-bold py-3 px-8 rounded-lg hover:bg-zinc-200 transition-all">
+            Return to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

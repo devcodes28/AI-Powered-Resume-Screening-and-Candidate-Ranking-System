@@ -1,64 +1,86 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="mb-4 fw-bold text-secondary">Recruiter Central Console</h2>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm bg-primary text-white p-3">
-            <h3>{{ total_jobs or jobs_count or 0 }}</h3>
-            <p class="mb-0 text-white-50">Active Job Descriptions Handled</p>
+<div class="py-6 w-full">
+<div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <h2 class="text-3xl font-bold tracking-tight text-brand">Welcome, {{ session.name }}</h2>
+            
+            <div class="flex items-center gap-3 mt-1">
+                <p class="text-muted m-0">Neural Console • Monitor active job matrices and screened candidates.</p>
+                <span class="text-zinc-600">•</span>
+                
+                <a href="{{ url_for('candidate.public_careers', recruiter_id=session.recruiter_id) }}" target="_blank" class="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1">
+                    Preview Public Job Board ↗
+                </a>
+            </div>
+        </div>
+        <a href="{{ url_for('recruiter.add_job') }}" class="bg-brand text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Publish Job Matrix
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="bg-panel border border-border rounded-xl p-6 shadow-sm">
+            <div class="text-muted text-sm font-medium mb-1">Active Job Matrices</div>
+            <div class="text-4xl font-bold text-brand">{{ total_jobs or jobs_count or 0 }}</div>
+        </div>
+        <div class="bg-panel border border-border rounded-xl p-6 shadow-sm relative overflow-hidden">
+            <div class="text-muted text-sm font-medium mb-1">Total Resumes Processed</div>
+            <div class="text-4xl font-bold text-green-400">{{ total_candidates or resumes_count or 0 }}</div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm bg-success text-white p-3">
-            <h3>{{ total_candidates or resumes_count or 0 }}</h3>
-            <p class="mb-0 text-white-50">Total Screenable Resumes Uploaded</p>
-        </div>
-    </div>
-</div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0 fw-bold text-dark">Job Openings Matrix</h5>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Job Title</th>
-                    <th>Company Name</th>
-                    <th>Required Experience</th>
-                    <th style="width: 320px;">Action Link</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for job in jobs %}
-                <tr>
-                    <td><strong>#{{ job.job_id }}</strong></td>
-                    <td>{{ job.title }}</td>
-                    <td>{{ job.company }}</td>
-                    <td><span class="badge bg-secondary">{{ job.experience_required }}</span></td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2" style="white-space: nowrap;">
-                            <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="btn btn-sm btn-dark px-3">
-                                View Candidates & Rankings
-                            </a>
-                            <form action="{{ url_for('recruiter.delete_job', job_id=job.job_id) }}" method="POST" onsubmit="return confirm('Are you completely sure you want to permanently delete this job spec and all uploaded resumes?');" class="m-0 d-inline">
-                                <button type="submit" class="btn btn-sm btn-danger px-2">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">No Job Specs available inside database instance store.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-border bg-base/50">
+            <h3 class="font-semibold text-brand">Active Deployments</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-muted uppercase bg-zinc-900/50 border-b border-border">
+                    <tr>
+                        <th class="px-6 py-4 font-medium">ID</th>
+                        <th class="px-6 py-4 font-medium">Position</th>
+                        <th class="px-6 py-4 font-medium">Experience</th>
+                        <th class="px-6 py-4 font-medium text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for job in jobs %}
+                    <tr class="hover:bg-zinc-800/20 transition-colors">
+                        <td class="px-6 py-4 font-mono text-zinc-500">#{{ job.job_id }}</td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-brand">{{ job.title }}</div>
+                            <div class="text-xs text-muted mt-0.5">{{ job.company }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                {{ job.experience_required }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-3">
+                                <a href="{{ url_for('candidate.rank_candidates_view', job_id=job.job_id) }}" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+                                    View Matrix →
+                                </a>
+                                <form action="{{ url_for('recruiter.delete_job', job_id=job.job_id) }}" method="POST" onsubmit="return confirm('Permanently purge this job matrix and all candidate data?');" class="m-0">
+                                    <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-400 transition-colors">
+                                        Purge
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-muted">
+                            No active job matrices found. Create one above.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

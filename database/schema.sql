@@ -1,6 +1,16 @@
--- 1. Jobs Table
+-- 1. Recruiters Table (Must be created first!)
+CREATE TABLE IF NOT EXISTS recruiters (
+    recruiter_id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Jobs Table (References recruiters)
 CREATE TABLE IF NOT EXISTS jobs (
     job_id SERIAL PRIMARY KEY,
+    recruiter_id INT REFERENCES recruiters(recruiter_id) ON DELETE CASCADE,
     title VARCHAR(150) NOT NULL,
     company VARCHAR(150) NOT NULL,
     description TEXT NOT NULL,
@@ -9,7 +19,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Candidates Table
+-- 3. Candidates Table
 CREATE TABLE IF NOT EXISTS candidates (
     candidate_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -17,10 +27,12 @@ CREATE TABLE IF NOT EXISTS candidates (
     phone VARCHAR(30),
     resume_file VARCHAR(255) NOT NULL,
     resume_text TEXT NOT NULL,
+    job_id INT REFERENCES jobs(job_id) ON DELETE CASCADE,
+    score NUMERIC(5, 2) DEFAULT 0.00,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. AI Rankings Table
+-- 4. AI Rankings Table
 CREATE TABLE IF NOT EXISTS rankings (
     ranking_id SERIAL PRIMARY KEY,
     job_id INT REFERENCES jobs(job_id) ON DELETE CASCADE,

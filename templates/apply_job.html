@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-xl mx-auto py-12 px-4">
+    <div class="bg-panel border border-border rounded-xl p-8 shadow-lg">
+        <h2 class="text-2xl font-bold text-brand mb-1">Apply for {{ job.title }}</h2>
+        <p class="text-muted text-sm mb-8">Submit your details and resume to {{ job.company }}.</p>
+        
+        <form action="{{ url_for('candidate.apply_job_public', job_id=job.job_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-zinc-300 mb-2">Full Name</label>
+                <input type="text" name="name" required class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-cyan-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-zinc-300 mb-2">Email Address</label>
+                <input type="email" name="email" required class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-cyan-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-zinc-300 mb-2">Phone</label>
+                <input type="text" name="phone" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-cyan-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-zinc-300 mb-2">Resume (PDF/DOCX)</label>
+                <input type="file" name="resume" required class="w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-brand hover:file:bg-zinc-700">
+            </div>
+            
+            <div class="flex items-start gap-3">
+                <input type="checkbox" required id="declaration" class="mt-1 accent-cyan-500">
+                <label for="declaration" class="text-xs text-zinc-400">
+                    I confirm the details provided are correct to the best of my knowledge and I authorize the processing of this resume for job application purposes.
+                </label>
+            </div>
+
+            <button type="submit" class="w-full bg-cyan-500 text-black font-bold py-3 rounded-lg hover:bg-cyan-400 transition-all">
+                Submit Application
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

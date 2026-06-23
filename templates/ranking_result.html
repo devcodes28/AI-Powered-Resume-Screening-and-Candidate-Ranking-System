@@ -1,90 +1,210 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-5">
+<div class="py-6 w-full">
     
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-6">
         <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-1">
-                    <li class="breadcrumb-item"><a href="{{ url_for('recruiter.dashboard') }}" class="text-decoration-none fw-medium text-secondary">Dashboard</a></li>
-                    <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Screening Matrix</li>
-                </ol>
+            <nav class="flex text-sm text-muted mb-2">
+                <a href="{{ url_for('recruiter.dashboard') }}" class="hover:text-brand transition-colors">Dashboard</a>
+                <span class="mx-2">/</span>
+                <span class="text-brand">Screening Matrix</span>
             </nav>
-            <h2 class="fw-bold text-dark mb-0">
+            <h2 class="text-3xl font-bold tracking-tight text-brand">
                 {{ job.title }} 
-                {% if job.company %}<span class="text-muted fs-5 fw-normal">at {{ job.company }}</span>{% endif %}
+                {% if job.company %}<span class="text-muted text-xl font-normal ml-2">at {{ job.company }}</span>{% endif %}
             </h2>
         </div>
-        <div>
-            <a href="{{ url_for('candidate.add_candidate', job_id=job.job_id) }}" class="btn btn-primary btn-lg fw-bold px-4 shadow-sm rounded-3">
-                ➕ Add New Candidate
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('candidate.export_csv', job_id=job.job_id) }}" class="bg-zinc-800 text-brand border border-zinc-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-700 transition-colors flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Export CSV
+            </a>
+            <a href="{{ url_for('candidate.add_candidate', job_id=job.job_id) }}" class="bg-brand text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Candidate
             </a>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-dark d-flex align-items-center">
-                <span class="me-2">🏆</span> AI Talent Alignment Standings
+    <div class="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-border bg-base/50 flex justify-between items-center">
+            <h5 class="font-semibold text-brand flex items-center gap-2">
+                <span>🏆</span> AI Talent Alignment Standings
             </h5>
-            <span class="badge bg-dark-subtle text-dark border px-3 py-2 rounded-pill fw-semibold">
-                Total Evaluated: {{ rankings|length }}
+            <span class="bg-zinc-800 text-zinc-300 border border-zinc-700 px-3 py-1 rounded-full text-xs font-medium">
+                Evaluated: {{ rankings|length }}
             </span>
         </div>
         
-        <div class="card-body p-0">
+        <div class="overflow-x-auto">
             {% if not rankings %}
-                <div class="text-center py-5 px-4 bg-light-subtle">
-                    <div class="fs-1 text-muted mb-3">📁</div>
-                    <h4 class="text-dark fw-bold mb-2">No Candidates Formally Tracked Yet</h4>
-                    <p class="text-muted mx-auto mb-4" style="max-width: 520px;">
-                        Click the <strong>Add New Candidate</strong> button above to register profiles and initialize the NLP matching metrics.
+                <div class="text-center py-16 px-4">
+                    <div class="text-4xl mb-3">📁</div>
+                    <h4 class="text-brand font-bold mb-2">No Candidates Tracked</h4>
+                    <p class="text-muted max-w-md mx-auto text-sm">
+                        Click "Add Candidate" above to register profiles and initialize the NLP matching metrics.
                     </p>
                 </div>
             {% else %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light text-secondary small text-uppercase tracking-wider">
-                            <tr>
-                                <th class="ps-4 py-3" style="width: 12%;">Rank</th>
-                                <th style="width: 33%;">Candidate Identity</th>
-                                <th style="width: 33%;">Contact Point</th>
-                                <th class="text-end pe-4" style="width: 22%;">NLP Matching Strength</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for candidate in rankings %}
-                            <tr>
-                                <td class="ps-4">
-                                    <span class="badge {% if loop.index == 1 %}bg-warning text-dark border border-warning-subtle fs-6{% else %}bg-dark text-white{% endif %} rounded-pill px-3 py-2 fw-bold shadow-sm">
-                                        #{{ loop.index }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="fw-bold text-dark fs-5 d-block">{{ candidate.name }}</span>
-                                    {% if candidate.phone %}
-                                        <small class="text-muted d-block mt-0.5"><i class="bi bi-telephone"></i> {{ candidate.phone }}</small>
-                                    {% endif %}
-                                </td>
-                                <td class="text-secondary fw-medium">{{ candidate.email }}</td>
-                                <td class="text-end pe-4">
-                                    <div class="d-inline-flex align-items-center justify-content-end w-100">
-                                        {% set pct_val = candidate.score|float %}
-                                        <div class="progress me-3 d-none d-sm-flex shadow-sm-inner" style="width: 110px; height: 10px; border-radius: 6px; background-color: #e9ecef;">
-                                            <div class="progress-bar bg-success rounded-pill" style="--width-fallback: {{ pct_val }}; width: calc(var(--width-fallback) * 1%);"></div>
-                                        </div>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold px-3 py-2 fs-6 rounded-3">
-                                            {{ "%.2f"|format(pct_val) }}% Score
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-muted uppercase bg-zinc-900/50 border-b border-border">
+                        <tr>
+                            <th class="px-6 py-4 font-medium w-20">Rank</th>
+                            <th class="px-6 py-4 font-medium">Candidate Identity</th>
+                            <th class="px-6 py-4 font-medium">Contact Details</th>
+                            <th class="px-6 py-4 font-medium">Pipeline Status</th>
+                            <th class="px-6 py-4 font-medium text-right">NLP Strength</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for candidate in rankings %}
+                        <tr class="hover:bg-zinc-800/20 transition-colors group">
+                            <td class="px-6 py-4">
+                                <span class="{% if loop.index == 1 %}bg-yellow-500/20 text-yellow-500 border-yellow-500/30{% else %}bg-zinc-800 text-zinc-300 border-zinc-700{% endif %} border px-3 py-1 rounded-full text-xs font-bold">
+                                    #{{ loop.index }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-brand text-base mb-1.5">{{ candidate.name }}</div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for badge in candidate.badges %}
+                                        <span class="text-[10px] uppercase tracking-wider bg-zinc-800 border border-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded shadow-sm">
+                                            {{ badge }}
                                         </span>
+                                    {% endfor %}
+                                    {% if not candidate.badges %}
+                                        <span class="text-[10px] text-zinc-500 italic">No direct keyword overlap</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-2">
+                                                                                <!-- Dynamic Mailto Logic (With JS targeting attributes) -->
+                                            {% set subject = "Update on your application for " ~ job.title ~ " at " ~ job.company %}
+                                            {% set body = "Hi " ~ candidate.name ~ ",%0D%0A%0D%0A" %}
+
+                                            {% if candidate.status == 'Offered' %}
+                                                {% set body = body ~ "We are thrilled to formally offer you the position! Please review the attached details." %}
+                                            {% elif candidate.status == 'Rejected' %}
+                                                {% set body = body ~ "Thank you for applying. While your profile is impressive, we have decided to move forward with other candidates at this time." %}
+                                            {% elif candidate.status == 'Interviewing' %}
+                                                {% set body = body ~ "We would love to move forward to the interview stage. Please let us know your availability." %}
+                                            {% else %}
+                                                {% set body = body ~ "We are currently reviewing your application and will be in touch shortly." %}
+                                            {% endif %}
+
+                                            <a id="email-link-{{ candidate.candidate_id }}" 
+                                            data-name="{{ candidate.name }}" 
+                                            data-email="{{ candidate.email }}" 
+                                            data-job="{{ job.title }}" 
+                                            data-company="{{ job.company }}"
+                                            href="mailto:{{ candidate.email }}?subject={{ subject }}&body={{ body }}" 
+                                            class="flex items-center text-xs text-brand hover:text-cyan-400 transition-colors group-hover:underline w-fit">
+                                                <svg class="w-3.5 h-3.5 mr-2 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                {{ candidate.email }}
+                                            </a>
+
+                                    {% if candidate.phone and candidate.phone != 'N/A' %}
+                                    <div class="flex items-center text-xs text-zinc-400 w-fit">
+                                        <svg class="w-3.5 h-3.5 mr-2 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                        {{ candidate.phone }}
                                     </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                    {% endif %}
+
+                                    {% if candidate.status == 'Interviewing' and job.assessment_url %}
+                                    <button onclick="copyAssessment('{{ candidate.name }}', '{{ job.assessment_url }}')" class="mt-1 flex items-center justify-center w-fit px-2 py-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-[10px] uppercase font-bold text-zinc-300 transition-colors">
+                                        <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        Copy Assessment Link
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <select onchange="updateStatus(this, {{ candidate.candidate_id }})" class="bg-base text-xs font-medium border border-border text-zinc-300 rounded-md px-2 py-1.5 focus:ring-1 focus:ring-brand outline-none transition-colors cursor-pointer hover:border-zinc-500">
+                                    <option value="Pending" {% if candidate.status == 'Pending' %}selected{% endif %}>🕒 Pending</option>
+                                    <option value="Interviewing" {% if candidate.status == 'Interviewing' %}selected{% endif %}>💬 Interviewing</option>
+                                    <option value="Offered" {% if candidate.status == 'Offered' %}selected{% endif %}>🎉 Offered</option>
+                                    <option value="Rejected" {% if candidate.status == 'Rejected' %}selected{% endif %}>❌ Rejected</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% set pct_val = candidate.score|float %}
+                                <div class="flex items-center justify-end gap-4">
+                                    <div class="hidden sm:block w-20 bg-zinc-800 rounded-full h-1.5 overflow-hidden border border-zinc-700">
+                                        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-1.5 rounded-full" style="width: {{ pct_val }}%"></div>
+                                    </div>
+                                    <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-lg text-sm font-bold w-20 text-center">
+                                        {{ "%.1f"|format(pct_val) }}%
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+    function updateStatus(selectElement, candidateId) {
+        const newStatus = selectElement.value;
+        selectElement.classList.add('opacity-50'); // visual loading cue
+        
+        fetch(`/update-status/${candidateId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            selectElement.classList.remove('opacity-50');
+            if (!data.success) {
+                alert('Failed to update status. Please refresh.');
+            } else {
+                // UI Magic: Update the email template instantly!
+                const emailLink = document.getElementById(`email-link-${candidateId}`);
+                if (emailLink) {
+                    const name = emailLink.getAttribute('data-name');
+                    const email = emailLink.getAttribute('data-email');
+                    const job = emailLink.getAttribute('data-job');
+                    const company = emailLink.getAttribute('data-company');
+                    
+                    const subject = encodeURIComponent(`Update on your application for ${job} at ${company}`);
+                    let body = `Hi ${name},\n\n`;
+                    
+                    if (newStatus === 'Offered') {
+                        body += "We are thrilled to formally offer you the position! Please review the attached details.";
+                    } else if (newStatus === 'Rejected') {
+                        body += "Thank you for applying. While your profile is impressive, we have decided to move forward with other candidates at this time.";
+                    } else if (newStatus === 'Interviewing') {
+                        body += "We would love to move forward to the interview stage. Please let us know your availability.";
+                    } else {
+                        body += "We are currently reviewing your application and will be in touch shortly.";
+                    }
+                    
+                    emailLink.href = `mailto:${email}?subject=${subject}&body=${encodeURIComponent(body)}`;
+                }
+            }
+        })
+        .catch(err => {
+            selectElement.classList.remove('opacity-50');
+            alert('Network error updating status.');
+        });
+    }
+
+    function copyAssessment(name, url) {
+        const text = `Hi ${name},\n\nPlease complete your technical assessment here: ${url}\n\nBest,`;
+        navigator.clipboard.writeText(text);
+        alert("Assessment message copied to clipboard!");
+    }
+</script>
+<script>
+    function copyAssessment(name, url) {
+        const text = `Hi ${name},\n\nPlease complete your technical assessment here: ${url}\n\nBest,`;
+        navigator.clipboard.writeText(text);
+        alert("Assessment message copied to clipboard!");
+    }
+</script>
 {% endblock %}
