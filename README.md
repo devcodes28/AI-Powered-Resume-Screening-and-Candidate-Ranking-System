@@ -30,7 +30,7 @@ Shakti Resume Screener is a full-stack recruitment platform designed to eliminat
 | :--- | :--- |
 | **Backend** | Python (Flask), Psycopg2 |
 | **Database** | PostgreSQL (Configured as `shaktiDB`) |
-| **NLP/ML** | Scikit-learn (TF-IDF), NLTK, OpenCV |
+| **NLP/ML** | Scikit-learn (TF-IDF), NLTK |
 | **Frontend** | Jinja2, Tailwind CSS, JavaScript |
 | **Deployment** | VirtualBox (Linux), Git LFS |
 
